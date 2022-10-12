@@ -76,7 +76,8 @@ namespace TestRequest.Controllers
         //[CacheGet]
         public async Task<IActionResult> GetTicket()
         {
-            return Ok(await this._context.Ticket.ToListAsync());
+            var data = await this._context.Ticket.ToListAsync();
+            return Ok(new { totalItem = data.Count(), items = data });
         }
         /// <summary>
         /// xóa vé
@@ -144,7 +145,7 @@ namespace TestRequest.Controllers
                     var waiting = await _context.Ticket.Where(x => x.tourId == tour.id && x.status == 1).ToListAsync();
                     var success = await _context.Ticket.Where(x => x.tourId == tour.id && x.status == 2).ToListAsync();
 
-                    
+
                     dataCacheBookingTour.total = total;
                     dataCacheBookingTour.waiting = waiting.Count();
                     dataCacheBookingTour.success = success.Count();
