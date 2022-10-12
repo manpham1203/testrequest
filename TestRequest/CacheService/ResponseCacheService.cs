@@ -90,7 +90,7 @@ namespace TestRequest.Cache
         /// <param name="response"></param>
         /// <param name="timeOut"></param>
         /// <returns></returns>
-        public void SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeOut)
+        public async Task SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeOut)
         {
             if (response == null)
                 return;
@@ -99,18 +99,18 @@ namespace TestRequest.Cache
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             });
-            _distributedCache.SetStringAsync(cacheKey, serializeResponse, new DistributedCacheEntryOptions()
+            await _distributedCache.SetStringAsync(cacheKey, serializeResponse, new DistributedCacheEntryOptions()
             {
                 AbsoluteExpirationRelativeToNow = timeOut
             });
         }
 
-        public DataCacheBookingTour GetBookingTicketCachedResponseAsync(string cacheKey)
+        public async Task<DataCacheBookingTour> GetBookingTicketCachedResponseAsync(string cacheKey)
         {
-            var cacheResponse = _distributedCache.GetStringAsync(cacheKey);
-            if (string.IsNullOrEmpty(cacheResponse.Result))
+            var cacheResponse = await _distributedCache.GetStringAsync(cacheKey);
+            if (string.IsNullOrEmpty(cacheResponse))
                 return null;
-            DataCacheBookingTour result = System.Text.Json.JsonSerializer.Deserialize<DataCacheBookingTour>(cacheResponse.Result);
+            DataCacheBookingTour result = System.Text.Json.JsonSerializer.Deserialize<DataCacheBookingTour>(cacheResponse);
             return result;
         }
 

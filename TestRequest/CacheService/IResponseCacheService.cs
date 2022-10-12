@@ -8,9 +8,9 @@ namespace TestRequest.Cache
 {
     public interface IResponseCacheService
     {
-        void SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeOut);
+        Task SetCacheResponseAsync(string cacheKey, object response, TimeSpan timeOut);
         Task<string> GetCachedResponseAsync(string cacheKey);
-        DataCacheBookingTour GetBookingTicketCachedResponseAsync(string cacheKey);
+        Task<DataCacheBookingTour> GetBookingTicketCachedResponseAsync(string cacheKey);
         Task UpdateBookingTicketCachedResponseAsync(string cacheKey, object response, TimeSpan timeOut);
         Task RemoveCacheResponseAsync(string pattern);
     }

@@ -35,7 +35,7 @@ namespace TestRequest.AppAttribute
 
             lock (this)
             {
-                DataCacheBookingTour cacheResponse = (DataCacheBookingTour)cacheService.GetBookingTicketCachedResponseAsync(cacheKey);
+                var cacheResponse = cacheService.GetBookingTicketCachedResponseAsync(cacheKey).Result;
 
                 if (cacheResponse != null)
                 {
@@ -54,13 +54,13 @@ namespace TestRequest.AppAttribute
                     {
                         // nếu còn đủ vé thì tăng cache lên
                         cacheResponse.waiting = cacheResponse.waiting + numTicket;
-                        cacheService.UpdateBookingTicketCachedResponseAsync(cacheKey, cacheResponse, TimeSpan.FromSeconds(_timeToLiveSeconds));
+                        cacheService.UpdateBookingTicketCachedResponseAsync(cacheKey, cacheResponse, TimeSpan.FromSeconds(_timeToLiveSeconds)).Wait();
                     }
                 }
-                var excutedContext = next();
-                if ((OkObjectResult)excutedContext.Result.Result is OkObjectResult objectResult)
+                var excutedContext = next().Result;
+                if (excutedContext.Result is OkObjectResult objectResult)
                 {
-                    cacheService.SetCacheResponseAsync(cacheKey, objectResult.Value, TimeSpan.FromSeconds(_timeToLiveSeconds));
+                    cacheService.SetCacheResponseAsync(cacheKey, objectResult.Value, TimeSpan.FromSeconds(_timeToLiveSeconds)).Wait();
                 }
             }
 
