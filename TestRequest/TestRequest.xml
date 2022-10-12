@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TestRequest</name>
+    </assembly>
+    <members>
+        <member name="M:TestRequest.AppAttribute.CacheBookingAttribute.GenerateCacheKeyFromRequest(Microsoft.AspNetCore.Http.HttpRequest,TestRequest.Model.Booking)">
+            <summary>
+            Tạo CacheKey theo request
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TestRequest.Controllers.BookingController.DeleteTicket">
+            <summary>
+            xóa vé
+            </summary>
+        </member>
+        <member name="M:TestRequest.Controllers.BookingController.CreateTour(TestRequest.Model.Tour)">
+            <summary>
+            tạo tour
+            </summary>
+        </member>
+        <member name="M:TestRequest.Controllers.BookingController.GetTour">
+            <summary>
+            danh sách tour
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:TestRequest.Controllers.BookingController.GetTicket">
+            <summary>
+            danh sách vé
+            </summary>
+        </member>
+        <member name="M:TestRequest.Controllers.BookingController.CreateBooking(TestRequest.Model.Booking)">
+            <summary>
+            đặt vé
+            </summary>
+        </member>
+        <member name="M:TestRequest.Controllers.BookingController.HangfireSchedule(TestRequest.Model.HangfireBooking)">
+            <summary>
+            mô phỏng đặt vé cùng lúc
+            </summary>
+            <param name="booking"></param>
+        </member>
+        <member name="P:TestRequest.Model.HangfireBooking.totalBooking">
+            <summary>
+            số người đặt cùng lúc
+            </summary>
+        </member>
+        <member name="P:TestRequest.Model.HangfireBooking.totalTicketPerPerson">
+            <summary>
+            số vé của mỗi người
+            </summary>
+        </member>
+    </members>
+</doc>
