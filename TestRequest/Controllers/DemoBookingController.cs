@@ -20,35 +20,21 @@ using Microsoft.AspNetCore.Hosting;
 namespace TestRequest.Controllers
 {
     /// <summary>
-    /// đặt vé
+    /// demo đặt vé
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    public class BookingController : ControllerBase
+    public class DemoBookingController : ControllerBase
     {
         private AppDbContext _context;
         private IResponseCacheService responseCacheService;
         private IWebHostEnvironment iwebHostEnvironment;
-        public BookingController(AppDbContext context, IServiceProvider serviceProvider, IWebHostEnvironment _iwebHostEnvironment)
+        public DemoBookingController(AppDbContext context, IServiceProvider serviceProvider, IWebHostEnvironment _iwebHostEnvironment)
         {
             _context = context;
             responseCacheService = serviceProvider.GetService<IResponseCacheService>();
             iwebHostEnvironment = _iwebHostEnvironment;
         }
-        ///// <summary>
-        ///// đặt cùng lúc (sau đó dùng hangfire để điều khiển)
-        ///// </summary>
-        //[HttpPost("booking-cache")]
-        //public IActionResult Booking(Booking request)
-        //{
-        //    BackgroundJob.Schedule(
-        //    () => this.ScheduleBooking(request),
-        //    DateTime.UtcNow.AddHours(2));
-        //    return Ok();
-        //}
-
-
-
         /// <summary>
         /// tạo tour
         /// </summary>
@@ -176,7 +162,7 @@ namespace TestRequest.Controllers
         }
 
         [NonAction]
-        public async Task TestCache(string body)
+        public async Task CreateRequest(string body)
         {
             string baseUrl = "http://localhost:5000/api/Booking/booking";
 
@@ -211,7 +197,7 @@ namespace TestRequest.Controllers
             for (int i = 0; i < booking.totalBooking; i++)
             {
                 BackgroundJob.Schedule(
-                () => this.TestCache(body),
+                () => this.CreateRequest(body),
                 DateTime.UtcNow.AddHours(2));
             }
             var currentLinkSite = $"{Request.Scheme}://{Request.Host}{Request.PathBase}/hangfire/jobs/scheduled?from=0&count={booking.totalBooking}";

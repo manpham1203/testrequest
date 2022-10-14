@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
+using RedLockNet.SERedis;
+using RedLockNet.SERedis.Configuration;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,40 +35,46 @@ namespace TestRequest.AppAttribute
 
             string cacheKey = GenerateCacheKeyFromRequest(context.HttpContext.Request, data);
             var cacheService = context.HttpContext.RequestServices.GetRequiredService<IResponseCacheService>();
-
-            lock (this)
+           
+     
+            var multiplexers = new List<RedLockMultiplexer>
             {
-                var cacheResponse = cacheService.GetBookingTicketCachedResponseAsync(cacheKey).Result;
-
-                if (cacheResponse != null)
+                ConnectionMultiplexer.Connect(redisConfiguration.ConnectionString),
+            };
+            var redlockFactory = RedLockFactory.Create(multiplexers);
+            await using (var redLock = await redlockFactory.CreateLockAsync(cacheKey, TimeSpan.FromSeconds(30)))
+            {
+                if (redLock.IsAcquired)
                 {
-                    var numTicket = data.tickets.Count();
-                    if (cacheResponse.total - cacheResponse.success - cacheResponse.waiting - numTicket < 0)
+                    var cacheResponse = await cacheService.GetBookingTicketCachedResponseAsync(cacheKey);
+
+                    if (cacheResponse != null)
                     {
-                        context.Result = new ContentResult
+                        var numTicket = data.tickets.Count();
+                        if (cacheResponse.total - cacheResponse.success - cacheResponse.waiting - numTicket < 0)
                         {
-                            Content = "Vé không còn bà con ơi",
-                            ContentType = "application/json",
-                            StatusCode = 200
-                        };
-                        return;
+                            context.Result = new ContentResult
+                            {
+                                Content = "Vé không còn bà con ơi",
+                                ContentType = "application/json",
+                                StatusCode = 200
+                            };
+                            return;
+                        }
+                        else
+                        {
+                            // nếu còn đủ vé thì tăng cache lên
+                            cacheResponse.waiting = cacheResponse.waiting + numTicket;
+                            await cacheService.UpdateBookingTicketCachedResponseAsync(cacheKey, cacheResponse, TimeSpan.FromSeconds(_timeToLiveSeconds));
+                        }
                     }
-                    else
+                    var excutedContext = await next();
+                    if (excutedContext.Result is OkObjectResult objectResult)
                     {
-                        // nếu còn đủ vé thì tăng cache lên
-                        cacheResponse.waiting = cacheResponse.waiting + numTicket;
-                        cacheService.UpdateBookingTicketCachedResponseAsync(cacheKey, cacheResponse, TimeSpan.FromSeconds(_timeToLiveSeconds)).Wait();
+                        await cacheService.SetCacheResponseAsync(cacheKey, objectResult.Value, TimeSpan.FromSeconds(_timeToLiveSeconds));
                     }
                 }
-                var excutedContext = next().Result;
-                if (excutedContext.Result is OkObjectResult objectResult)
-                {
-                    cacheService.SetCacheResponseAsync(cacheKey, objectResult.Value, TimeSpan.FromSeconds(_timeToLiveSeconds)).Wait();
-                }
-            }
-
-
-            //nếu không có cache => lấy data => gán vô cache
+            }            
         }
         /// <summary>
         /// Tạo CacheKey theo request

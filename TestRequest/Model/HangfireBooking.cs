@@ -24,4 +24,5 @@ namespace TestRequest.Model
         /// </summary>
         public int tourId { get; set; }
     }
+    
 }

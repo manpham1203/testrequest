@@ -33,6 +33,10 @@ namespace TestRequest
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+
+
+
             services.AddHangfire(configuration => configuration
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
             .UseSimpleAssemblyNameTypeSerializer()
@@ -103,6 +107,8 @@ namespace TestRequest
             services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConfiguration.ConnectionString));
             services.AddStackExchangeRedisCache(option => option.Configuration = redisConfiguration.ConnectionString);
             services.AddSingleton<IResponseCacheService, ResponseCacheService>();
+
+           
         }
        
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
